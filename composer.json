@@ -10,5 +10,8 @@
     },
     "require-dev": {
         "swoole/ide-helper": "@dev"
-    }
+    },
+  "require": {
+    "ext-pdo": "*"
+  }
 }
