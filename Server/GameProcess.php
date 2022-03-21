@@ -29,6 +29,7 @@ class GameProcess {
         $inputTable->create();
         $this->atomicState = new Atomic(GameState::SHUTDOWN->value);
     }
+
     public function tryJoin(int $fd, mixed $data): bool {
         $this->wakeUp();
         $playerTable = $this->playerTable;
@@ -39,9 +40,11 @@ class GameProcess {
         $playerTable->set($fdStr, [Config::NAME_COL => $data->name]);
         return true;
     }
+    
     public function wakeUp(): void {
         if ($this->atomicState->get() == GameState::WAITING->value) $this->atomicState->wakeup();
     }
+    
     public function tryInput(int $fd, mixed $data): bool {
         $fdStr = strval($fd);
         if (!isset($data->input) || !is_int($data->input) || !($input = Input::tryFrom($data->req))) return false;
