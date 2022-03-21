@@ -1,0 +1,14 @@
+{
+    "name": "eslof/snakeserver",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Concrete\\": "Concrete/",
+            "Model\\": "Model/",
+            "Server\\": "Server/"
+        }
+    },
+    "require-dev": {
+        "swoole/ide-helper": "@dev"
+    }
+}
