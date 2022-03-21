@@ -21,6 +21,7 @@ abstract class BoardBase implements IBoard {
             $this->slots[] = $slotRow;
         }
     }
+    
     protected abstract function getNewSlot(int $x, int $y): ISlot;
     public function getGame(): IGame { return $this->game; }
     public function setGame(IGame $game): void { $this->game = $game; }
