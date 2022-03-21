@@ -22,7 +22,7 @@ class GameServer {
     }
 
     protected function onStart(Server $server): void {
-        echo "Server has begun and what not" . PHP_EOL;
+        echo "Server has begun and what not".PHP_EOL;
     }
 
     protected function onOpen(Server $server, Request $request): void {
