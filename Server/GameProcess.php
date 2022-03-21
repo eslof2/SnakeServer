@@ -54,7 +54,8 @@ class GameProcess {
         return new Process(function ($process) use ($game, $server) {
             $state = GameState::from($this->atomicState->get());
             if ($state != GameState::SHUTDOWN || $state == GameState::ERROR) {
-                throw new \Error("Invalid Atomic GameState for getNewProcess: ".$state::class."::".$state->name);
+                error_log("Invalid Atomic GameState for getNewProcess: ".$state::class."::".$state->name);
+                $server->shutdown();
             }
 
             $this->atomicState->set(GameState::STARTING->value);
