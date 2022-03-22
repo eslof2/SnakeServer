@@ -118,7 +118,6 @@ abstract class GameBase implements IGame {
         $player->setDeathCallback($this->onPlayerDeath(...));
         $player->setBoard($this->board);
         $this->players[$fd] = $player;
-        $this->broadcastStateFor($fd);
         return true;
     }
 
