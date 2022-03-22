@@ -2,7 +2,7 @@
 
 namespace Model\Player;
 enum Input: int {
-    case NONE = 0;
-    case LEFT = 1;
-    case RIGHT = 2;
+    case NONE = 1;
+    case LEFT = 2;
+    case RIGHT = 3;
 }
