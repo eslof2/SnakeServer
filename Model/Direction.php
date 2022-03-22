@@ -3,11 +3,11 @@
 namespace Model;
 use Model\Player\Input;
 
-enum Direction {
-    case DOWN;
-    case LEFT;
-    case RIGHT;
-    case UP;
+enum Direction: int {
+    case DOWN = 1;
+    case LEFT = 2;
+    case RIGHT = 3;
+    case UP = 4;
 
     public function rotate(Input $input): Direction {
         return match ($input) {
