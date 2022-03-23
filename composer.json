@@ -12,6 +12,7 @@
         "swoole/ide-helper": "@dev"
     },
   "require": {
-    "ext-pdo": "*"
+    "ext-pdo": "*",
+    "ext-mbstring": "*"
   }
 }

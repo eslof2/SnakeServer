@@ -3,7 +3,7 @@ PHP/Swoole multiplayer Snake game server.
 
 Requires PHP 8.1 <br />
 Requires Swoole: https://openswoole.com/docs/get-started/installation <br />
-In the composer: ext-pdo required, and swoole-ide-helper not required but helps for autocompletion et.c. <br />
+In the composer: ext-mbstring and ext-pdo required, and swoole-ide-helper not required but helps for autocompletion et.c. <br />
 
 
 Concrete contains implemented classes. <br />
