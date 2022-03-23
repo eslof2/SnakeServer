@@ -31,8 +31,8 @@ class GameServer {
 
     protected function onMessage(Server $server, Frame $frame): void {
         $fd = $frame->fd;
-        if (!($data = json_decode($frame->data, true))) return;
-        if (!isset($data->req) || !is_int($data->req) || !($req = PlayerRequest::tryFrom($data->req))) return;
+        if (!($data = json_decode($frame->data))) return;
+        if (!isset($data->request) || !is_int($data->request) || !($req = PlayerRequest::tryFrom($data->request))) return;
         $success = match ($req) {
             PlayerRequest::JOIN => $this->gameProcess->tryJoin($fd, $data),
             PlayerRequest::INPUT => $this->gameProcess->tryInput($fd, $data)
