@@ -9,12 +9,11 @@ use Model\State\StateT;
 
 abstract class PlayerBase implements IPlayer {
     use StateT;
-    use DirtyT;
 
     protected IBoard $board;
     protected Input $input;
     protected IShape $shape;
-    /** @var null|Closure(I):void */
+    /** @var null|Closure(IPlayer):void */
     protected ?\Closure $deathCallback;
 
     public function __construct(
