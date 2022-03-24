@@ -11,8 +11,9 @@ class NormalGame extends GameBase {
     private FoodEntity $food;
 
     public function __construct(int $width, int $height, int $maxPlayers) {
+        // TODO: I'm really unsure about this, I think I want to pass a ready-made board instead of creating it
         $board = new NormalBoard($width, $height);
-        $this->view = new DeltaView();
+        $this->view = new DeltaView(); // TODO: probably same for this
         parent::__construct($board, $maxPlayers);
     }
 
