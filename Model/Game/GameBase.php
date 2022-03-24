@@ -84,10 +84,9 @@ abstract class GameBase implements IGame {
         foreach ($this->players as $p) $p->processCollision();
 
         foreach ($newPlayers as $fdStr => $noob) {
-            if (!$this->tryAddPlayer($noob)) {
-                $this->playerTable->del($fdStr);
-                $this->inputTable->del($fdStr);
-            }
+            if ($this->tryAddPlayer($noob)) continue;
+            $this->playerTable->del($fdStr);
+            $this->inputTable->del($fdStr);
         }
 
         $this->broadcastState();
