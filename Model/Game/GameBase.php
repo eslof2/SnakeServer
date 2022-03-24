@@ -65,7 +65,7 @@ abstract class GameBase implements IGame {
         }
 
         //mostly for stopping memory leak in lastTickByFd
-        foreach ($this->lastTickByFd as $fd=>$tick) {
+        foreach ($this->lastTickByFd as $fd => $tick) {
             if (!$this->server->exist($fd)) $this->onDisconnect($fd);
         }
 
@@ -83,7 +83,7 @@ abstract class GameBase implements IGame {
         foreach ($this->players as $p) $p->processMovement();
         foreach ($this->players as $p) $p->processCollision();
 
-        foreach ($newPlayers as $fdStr=>$noob) {
+        foreach ($newPlayers as $fdStr => $noob) {
             if (!$this->tryAddPlayer($noob)) {
                 $this->playerTable->del($fdStr);
                 $this->inputTable->del($fdStr);
