@@ -91,6 +91,13 @@ abstract class GameBase implements IGame {
         }
 
         $this->broadcastState();
+
+        foreach ($this->players as $fd => $player) {
+            if (!$player->isDead()) continue;
+            unset($this->players[$fd]);
+            $this->inputTable->del(strval($fd));
+            $this->playerTable->del(strval($fd));
+        }
     }
 
     protected function broadcastState(): void {
@@ -140,8 +147,5 @@ abstract class GameBase implements IGame {
         $prep->bindParam("name", $name, PDO::PARAM_STR, Config::NAME_VARCHAR_MAX);
         $prep->bindParam("score", $score, PDO::PARAM_INT); // TODO: hard coded
         $prep->execute();
-        unset($this->players[$fd]);
-        $this->inputTable->del(strval($fd));
-        $this->playerTable->del(strval($fd));
     }
 }
