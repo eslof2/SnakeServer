@@ -47,7 +47,7 @@ class GameProcess {
     
     public function tryInput(int $fd, mixed $data): bool {
         $fdStr = strval($fd);
-        if (!isset($data->input) || !is_int($data->input) || !($input = Input::tryFrom($data->req))) return false;
+        if (!isset($data->input) || !is_int($data->input) || !($input = Input::tryFrom($data->input))) return false;
         if (!$this->playerTable->exist($fdStr)) return false;
         $this->inputTable->set($fdStr, [Config::INPUT_COL => $input]);
         return true;
