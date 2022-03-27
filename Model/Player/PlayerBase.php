@@ -39,12 +39,13 @@ abstract class PlayerBase implements IPlayer {
     }
 
     public function processCollision(): void {
-        $slot = $this->shape->tryGetSlot();
+        $thisEntity = $this->shape->getEntity();
+        $slot = $thisEntity->getSlot();
         if (!$slot) { //player hit board boundaries
             $this->setHealth(0);
         } else {
             foreach ($slot->getEntities() as $entity) {
-                if ($entity === $this->shape->getEntity()) continue;
+                if ($entity === $thisEntity) continue;
                 $entity->collide($this);
             }
         }
