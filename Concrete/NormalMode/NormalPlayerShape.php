@@ -16,6 +16,7 @@ class NormalPlayerShape extends ShapeBase {
     protected array $bodyEntities = [];
 
     public function __construct(protected int $fd) {}
+
     public function destroy(): void {
         if ($this->headEntity === null) throw new InternalMisuseException("Destroy for PlayerShape destroyed or not instantiated.");
         $this->headEntity->detachFromSlot(); //head can be out of bounds
@@ -47,13 +48,16 @@ class NormalPlayerShape extends ShapeBase {
             }
         }
     }
+
     protected function getNewDirection(Input $input): Direction {
         return $this->headEntity->getDirection()->rotate($input);
     }
+
     public function tryGetSlot(): ?ISlot {
         if ($this->headEntity === null) throw new InternalMisuseException("GetSlot for PlayerShape destroyed or not instantiated.");
         return $this->headEntity->tryGetSlot();
     }
+
     protected function moveHead(?ISlot $newSlot, Direction $direction): ?ISlot {
         $headEntity = $this->headEntity;
         $headEntity->setDirection($direction);

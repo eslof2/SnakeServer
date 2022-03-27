@@ -10,6 +10,7 @@ class PlayerEntity extends EntityBase {
     public EntityType $entityType = EntityType::PLAYER;
 
     public function __construct(public int $fd, public PlayerType $playerType) {}
+
     public function onCollide(IPlayer $player): void {
         $player->setHealth(0);
     }
