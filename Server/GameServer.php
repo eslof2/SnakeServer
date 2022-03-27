@@ -26,6 +26,7 @@ class GameServer {
     }
 
     protected function onOpen(Server $server, Request $request): void {
+        $server->send($request->fd, ["fd" => $request->fd]);
         $this->gameProcess->wakeUp();
     }
 
