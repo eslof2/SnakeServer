@@ -25,19 +25,14 @@ abstract class EntityBase implements IEntity {
     // we give inherited types an entry point for custom code
     public abstract function onCollide(IPlayer $player): void;
 
-    public function detachFromSlot(): ?ISlot {
-        if ($this->slot === null) throw new InternalMisuseException("Detaching already detached entity.");
-        $oldSlot = $this->slot;
-        $oldSlot?->remove($this);
-        return $oldSlot;
-    }
+    public function detachFromSlot(): void { $this->slot?->remove($this); }
     public function getDirection(): Direction { return $this->direction; }
     public function setDirection(Direction $direction): void {
         $this->direction = $direction;
         $this->setDirty();
     }
     public function getEntityType(): EntityType { return $this->entityType; }
-    public function getSlot(): ?ISlot { return $this->slot; }
+    public function tryGetSlot(): ?ISlot { return $this->slot; }
     public function setSlot(?ISlot $slot): void { $this->slot = $slot; }
     /** @param null|Closure(IEntity, IPlayer):void $onCollide */
     public function setCollideCallback(?\Closure $onCollide): void { $this->collideCallback = $onCollide; }

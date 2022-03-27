@@ -8,12 +8,12 @@ use Model\Slot\ISlot;
 
 interface IEntity extends IDirty {
     public function collide(IPlayer $player): void;
-    public function getSlot(): ?ISlot;
+    public function tryGetSlot(): ?ISlot;
     public function getDirection(): Direction;
     public function getEntityType(): EntityType;
     /** @param null|Closure(IEntity, IPlayer):void $onCollide */
     public function setCollideCallback(?\Closure $onCollide): void; //TODO: abstract callback pattern
     public function setDirection(Direction $direction): void;
     public function setSlot(?ISlot $slot): void;
-    public function detachFromSlot(): ?ISlot;
+    public function detachFromSlot(): void;
 }

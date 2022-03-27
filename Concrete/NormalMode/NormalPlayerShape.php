@@ -18,7 +18,7 @@ class NormalPlayerShape extends ShapeBase {
     public function __construct(protected int $fd) {}
     public function destroy(): void {
         if ($this->headEntity === null) throw new InternalMisuseException("Destroy for PlayerShape destroyed or not instantiated.");
-        if ($this->headEntity->getSlot()) $this->headEntity->detachFromSlot(); //head can be out of bounds
+        $this->headEntity->detachFromSlot(); //head can be out of bounds
         foreach ($this->bodyEntities as $entity) {
             $entity->detachFromSlot();
         }
@@ -26,7 +26,7 @@ class NormalPlayerShape extends ShapeBase {
 
     public function move(Input $input): void {
         if ($this->headEntity === null) throw new InternalMisuseException("Move for PlayerShape destroyed or not instantiated.");
-        if (!$oldSlot = $this->headEntity->getSlot()) throw new InternalMisuseException("Move for PlayerShape out of bounds.");
+        if (!$oldSlot = $this->headEntity->tryGetSlot()) throw new InternalMisuseException("Move for PlayerShape out of bounds.");
         $x = $y = 0;
         $oldSlot->getPosition(outX: $x, outY: $y);
         $newDirection = $this->getNewDirection($input);
@@ -52,12 +52,13 @@ class NormalPlayerShape extends ShapeBase {
     }
     public function tryGetSlot(): ?ISlot {
         if ($this->headEntity === null) throw new InternalMisuseException("GetSlot for PlayerShape destroyed or not instantiated.");
-        return $this->headEntity->getSlot();
+        return $this->headEntity->tryGetSlot();
     }
     protected function moveHead(?ISlot $newSlot, Direction $direction): ?ISlot {
         $headEntity = $this->headEntity;
         $headEntity->setDirection($direction);
-        $oldSlot = $headEntity->detachFromSlot();
+        $oldSlot = $headEntity->tryGetSlot();
+        $headEntity->detachFromSlot();
         $newSlot?->add($headEntity);
         return $oldSlot;
     }
