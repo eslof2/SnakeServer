@@ -17,7 +17,7 @@ class NormalPlayerShape extends ShapeBase {
 
     public function __construct(protected int $fd) {}
     public function destroy(): void {
-        if (is_null($this->headEntity)) throw new InternalMisuseException("Destroy for PlayerShape destroyed or not instantiated.");
+        if ($this->headEntity === null) throw new InternalMisuseException("Destroy for PlayerShape destroyed or not instantiated.");
         if ($this->headEntity->getSlot()) $this->headEntity->detachFromSlot(); //head can be out of bounds
         foreach ($this->bodyEntities as $entity) {
             $entity->detachFromSlot();
@@ -25,7 +25,7 @@ class NormalPlayerShape extends ShapeBase {
     }
 
     public function move(Input $input): void {
-        if (is_null($this->headEntity)) throw new InternalMisuseException("Move for PlayerShape destroyed or not instantiated.");
+        if ($this->headEntity === null) throw new InternalMisuseException("Move for PlayerShape destroyed or not instantiated.");
         if (!$oldSlot = $this->headEntity->getSlot()) throw new InternalMisuseException("Move for PlayerShape out of bounds.");
         $x = $y = 0;
         $oldSlot->getPosition(outX: $x, outY: $y);
@@ -51,7 +51,7 @@ class NormalPlayerShape extends ShapeBase {
         return $this->headEntity->getDirection()->rotate($input);
     }
     public function tryGetSlot(): ?ISlot {
-        if (is_null($this->headEntity)) throw new InternalMisuseException("GetSlot for PlayerShape destroyed or not instantiated.");
+        if ($this->headEntity === null) throw new InternalMisuseException("GetSlot for PlayerShape destroyed or not instantiated.");
         return $this->headEntity->getSlot();
     }
     protected function moveHead(?ISlot $newSlot, Direction $direction): ?ISlot {
@@ -95,7 +95,7 @@ class NormalPlayerShape extends ShapeBase {
     }
 
     public function getEntity(): IEntity {
-        if (is_null($this->headEntity)) throw new InternalMisuseException("getEntity for PlayerShape destroyed or not instantiated.");
+        if ($this->headEntity === null) throw new InternalMisuseException("getEntity for PlayerShape destroyed or not instantiated.");
         return $this->headEntity;
     }
 }

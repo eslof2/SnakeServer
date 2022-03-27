@@ -19,14 +19,14 @@ abstract class EntityBase implements IEntity {
     public final function collide(IPlayer $player): void {
         $this->onCollide($player);
         //I think there's a decent way to abstract this callback pattern with traits and "as"
-        if (!is_null($this->collideCallback)) ($this->collideCallback)($this, $player);
+        if ($this->collideCallback !== null) ($this->collideCallback)($this, $player);
     }
 
     // we give inherited types an entry point for custom code
     public abstract function onCollide(IPlayer $player): void;
 
     public function detachFromSlot(): ?ISlot {
-        if (is_null($this->slot)) throw new InternalMisuseException("Detaching already detached entity.");
+        if ($this->slot === null) throw new InternalMisuseException("Detaching already detached entity.");
         $oldSlot = $this->slot;
         $oldSlot?->remove($this);
         return $oldSlot;

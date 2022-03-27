@@ -51,7 +51,7 @@ abstract class PlayerBase implements IPlayer {
 
         if ($this->isDead()) {
             $this->shape->destroy();
-            if (!is_null($this->deathCallback)) ($this->deathCallback)($this);
+            if ($this->deathCallback !== null) ($this->deathCallback)($this);
         }
     }
 
