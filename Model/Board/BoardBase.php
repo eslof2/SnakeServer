@@ -3,22 +3,23 @@
 namespace Model\Board;
 use Model\Game\IGame;
 use Model\Slot\ISlot;
+use SplFixedArray;
 
 abstract class BoardBase implements IBoard {
     protected IGame $game;
     /** @var ISlot[][] */
-    protected array $slots = [];
+    protected SplFixedArray $slots;
 
     public function __construct(
         protected int $width,
         protected int $height
     ) {
+        $this->slots = new SplFixedArray($this->width);
         for ($x = 0; $x < $this->height; $x++) {
-            $slotRow = [];
+            $this->slots[$x] = new SplFixedArray($this->height);
             for ($y = 0; $y < $this->width; $y++) {
-                $slotRow[] = $this->getNewSlot($x, $y);
+                $this->slots[$x][$y] = $this->getNewSlot($x, $y);
             }
-            $this->slots[] = $slotRow;
         }
     }
     
@@ -34,7 +35,7 @@ abstract class BoardBase implements IBoard {
         $emptySlots = [];
         foreach ($this->slots as $row) {
             foreach ($row as $slot) {
-                if ($slot->isEmpty()) continue;
+                if (!$slot->isEmpty()) continue;
                 $emptySlots[] = $slot;
             }
         }

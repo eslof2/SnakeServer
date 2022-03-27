@@ -19,7 +19,7 @@ abstract class SlotBase implements ISlot, JsonSerializable {
 
     public function add(IEntity $entity): void {
         $key = spl_object_id($entity);
-        if (isset($this->entities[$key])) throw new InternalMisuseException("Adding entity already in slot.");
+        if (array_key_exists($key, $this->entities)) throw new InternalMisuseException("Adding entity already in slot.");
         $this->entities[$key] = $entity;
         $entity->setSlot($this);
         $this->setDirty();
@@ -27,7 +27,8 @@ abstract class SlotBase implements ISlot, JsonSerializable {
 
     public function remove(IEntity $entity): void {
         $key = spl_object_id($entity);
-        if (!isset($this->entities[$key])) throw new InternalMisuseException("Removing entity not in slot.");
+        if (!array_key_exists($key, $this->entities)) throw new InternalMisuseException("Removing entity not in slot.");
+        $this->entities[$key]->setSlot(null);
         unset($this->entities[$key]);
         $this->setDirty();
     }
@@ -35,7 +36,8 @@ abstract class SlotBase implements ISlot, JsonSerializable {
     public function isEmpty(): bool { return count($this->entities) == 0; }
     public function getBoard(): IBoard { return $this->board; }
     public function getEntities(): array { return $this->entities; }
-    public function jsonSerialize(): array { return $this->entities; }
+    /** @return IEntity[] */
+    public function jsonSerialize(): mixed { return array_values($this->entities); }
     public function isDirty(): bool {
         if ($this->isDirty) return true;
         foreach ($this->entities as $entity) {

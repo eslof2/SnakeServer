@@ -8,7 +8,7 @@ use Model\Game\GameBase;
 use Model\Player\IPlayer;
 
 class NormalGame extends GameBase {
-    private FoodEntity $food;
+    private ?FoodEntity $food = null;
 
     public function __construct(int $width, int $height, int $maxPlayers) {
         // TODO: I'm really unsure about this, I think I want to pass a ready-made board instead of creating it
@@ -22,7 +22,7 @@ class NormalGame extends GameBase {
     }
 
     protected function foodLoop(IEntity $consumable = null, IPlayer $player = null) {
-        $this->food->detachFromSlot();
+        $this->food?->detachFromSlot();
         if (!($newSlot = $this->board->tryGetEmptySlot())) throw new \Exception("Board is full of snake.");
         $food = $this->food = new FoodEntity();
         $food->setCollideCallback($this->foodLoop(...));

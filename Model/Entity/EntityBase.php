@@ -13,9 +13,8 @@ abstract class EntityBase implements IEntity {
     public EntityType $entityType;
     public Direction $direction = Direction::DOWN;
     protected ?ISlot $slot = null;
-    protected int $slotKey;
     /** @var null|Closure(IEntity, IPlayer):void */
-    private ?\Closure $collideCallback;
+    private ?\Closure $collideCallback = null;
 
     public final function collide(IPlayer $player): void {
         $this->onCollide($player);

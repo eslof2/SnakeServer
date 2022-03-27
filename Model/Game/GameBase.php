@@ -15,11 +15,11 @@ use Swoole\WebSocket\Server;
 
 abstract class GameBase implements IGame {
     protected Server $server;
-    protected PDO $database;
+    protected ?PDO $database;
     protected Table $playerTable;
     protected Table $inputTable;
     protected Atomic $atomicState;
-    /** @var IPlayer[] $players */
+    /** @var IPlayer[] $players TODO: set up "fd to id" and use SplFixedArray where id == index */
     protected array $players = [];
     protected IView $view;
     protected Time $time;
@@ -29,15 +29,13 @@ abstract class GameBase implements IGame {
     public function __construct(
         protected IBoard $board,
         protected int $maxPlayerCount,
-        protected int $tickRateNs = 1000000,
+        protected int $tickRateNs = 1000000000,
         protected float $timeScale = 1
     ) {
-        // ref set up all the way from entity -> slot -> board -> game
-        // this way we can implement IEntity and create any form of effect on collision
         $this->board->setGame($this);
     }
 
-    public function setUp(Server $server, PDO $database, Table $playerTable, Table $inputTable, Atomic $atomicState): void {
+    public function setUp(Server $server, ?PDO $database, Table $playerTable, Table $inputTable, Atomic $atomicState): void {
         $this->server = $server;
         $this->database = $database;
         $this->playerTable = $playerTable;
@@ -77,7 +75,7 @@ abstract class GameBase implements IGame {
                 $player = $newPlayers[$fdStr] = $this->getNewPlayer($fd, $row[Config::NAME_COL]);
             }
 
-            $player->setInput(Input::from($this->inputTable[$fdStr][Config::INPUT_COL]));
+            $player->setInput(Input::from($this->inputTable->get($fdStr, Config::INPUT_COL)));
         }
 
         foreach ($this->players as $p) $p->processMovement();
@@ -110,7 +108,7 @@ abstract class GameBase implements IGame {
     }
 
     public function tryGetPlayer(int $fd): ?IPlayer {
-        if (!isset($fd, $this->players)) return null;
+        if (!array_key_exists($fd, $this->players)) return null;
         return $this->players[$fd];
     }
 
@@ -120,9 +118,9 @@ abstract class GameBase implements IGame {
 
     public function tryAddPlayer(IPlayer $player): bool {
         $fd = $player->getFd();
+        $player->setBoard($this->board);
         if (!$player->tryInstantiate()) return false;
         $player->setDeathCallback($this->onPlayerDeath(...));
-        $player->setBoard($this->board);
         $this->players[$fd] = $player;
         return true;
     }
@@ -138,13 +136,14 @@ abstract class GameBase implements IGame {
 
     public abstract function onStart(): void;
 
-    protected function onPlayerDeath(int $fd): void {
-        $sql = "INSERT INTO score (name, score) VALUES (:name, :score)";
-        $prep = $this->database->prepare($sql);
-        $name = $this->players[$fd]->getName();
-        $score = $this->players[$fd]->getScore();
-        $prep->bindParam("name", $name, PDO::PARAM_STR, Config::NAME_VARCHAR_MAX);
-        $prep->bindParam("score", $score, PDO::PARAM_INT); // TODO: hard coded
-        $prep->execute();
+    protected function onPlayerDeath(IPlayer $player): void {
+        //$sql = "INSERT INTO score (name, score) VALUES (:name, :score)";
+        //$prep = $this->database->prepare($sql);
+        $name = $player->getName();
+        $score = $player->getScore();
+        echo $name." ".$score;
+        //$prep->bindParam("name", $name, PDO::PARAM_STR, Config::NAME_VARCHAR_MAX);
+        //$prep->bindParam("score", $score, PDO::PARAM_INT); // TODO: hard coded
+        //$prep->execute();
     }
 }

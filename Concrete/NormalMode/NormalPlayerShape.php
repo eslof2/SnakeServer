@@ -3,6 +3,7 @@
 namespace Concrete\NormalMode;
 use Concrete\Entity\PlayerEntity;
 use Model\Direction;
+use Model\Entity\IEntity;
 use Model\Entity\PlayerType;
 use Model\InternalMisuseException;
 use Model\Player\Input;
@@ -17,7 +18,7 @@ class NormalPlayerShape extends ShapeBase {
     public function __construct(protected int $fd) {}
     public function destroy(): void {
         if (is_null($this->headEntity)) throw new InternalMisuseException("Destroy for PlayerShape destroyed or not instantiated.");
-        $this->headEntity->detachFromSlot();
+        if ($this->headEntity->getSlot()) $this->headEntity->detachFromSlot(); //head can be out of bounds
         foreach ($this->bodyEntities as $entity) {
             $entity->detachFromSlot();
         }
@@ -36,12 +37,12 @@ class NormalPlayerShape extends ShapeBase {
         $bodyCount = count($this->bodyEntities);
         $size = $this->size;
 
-        if ($size <= 1) return;
-        if ($size > $bodyCount + 1) $this->growBody($oldSlot, $newDirection);
+        if ($size == 0) return;
+        if ($size > $bodyCount) $this->growBody($oldSlot, $newDirection);
         else {
             $this->moveBody($oldSlot, $newDirection);
 
-            if ($this->size < $bodyCount + 1) {
+            if ($this->size < $bodyCount) {
                 $this->popLastBodyEntity();
             }
         }
@@ -79,6 +80,7 @@ class NormalPlayerShape extends ShapeBase {
         $lastBody = $this->bodyEntities[0];
         $lastBody->detachFromSlot();
         unset($this->bodyEntities[0]);
+        $this->bodyEntities = array_values($this->bodyEntities);
         return $lastBody;
     }
 
@@ -90,5 +92,10 @@ class NormalPlayerShape extends ShapeBase {
         $entity->setDirection($direction);
         $slot->add($entity);
         $this->headEntity = $entity;
+    }
+
+    public function getEntity(): IEntity {
+        if (is_null($this->headEntity)) throw new InternalMisuseException("getEntity for PlayerShape destroyed or not instantiated.");
+        return $this->headEntity;
     }
 }

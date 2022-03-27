@@ -5,8 +5,8 @@ use Concrete\Engine\Engine;
 use Model\Game\IGame;
 use Model\GameState;
 use Model\Player\Input;
-use PDO;
 use PDOException;
+use PDO;
 use Swoole\Atomic;
 use Swoole\Process;
 use Swoole\Table;
@@ -28,6 +28,8 @@ class GameProcess {
         $inputTable->column(Config::INPUT_COL, Table::TYPE_INT, 4);       //1,2,4,8
         $inputTable->create();
         $this->atomicState = new Atomic(GameState::SHUTDOWN->value);
+        $playerTable->set("1", array(Config::NAME_COL => "john"));
+        $inputTable->set("1", array(Config::INPUT_COL => Input::NONE->value));
     }
 
     public function tryJoin(int $fd, mixed $data): bool {
@@ -68,13 +70,13 @@ class GameProcess {
             } catch (PDOException $e) {
                 $code = (int)$e->getCode();
                 $msg = $e->getMessage();
-                error_log("PDO Error ($code): $msg");
-                $this->atomicState->set(GameState::ERROR->value);
-                $server->shutdown();
-                return;
+                //error_log("PDO Error ($code): $msg");
+                //$this->atomicState->set(GameState::ERROR->value);
+                //$server->shutdown();
+                //return;
             }
 
-            $game->setUp($server, $pdo, $this->playerTable, $this->inputTable, $this->atomicState);
+            $game->setUp($server, null, $this->playerTable, $this->inputTable, $this->atomicState);
             new Engine($game, $this->atomicState);
             $this->atomicState->set(GameState::SHUTDOWN->value);
         });

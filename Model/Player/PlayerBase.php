@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 
 namespace Model\Player;
+use Concrete\NormalMode\NormalPlayerShape;
 use Model\Board\IBoard;
 use Model\Direction;
 use Model\Dirty\DirtyT;
@@ -43,6 +44,7 @@ abstract class PlayerBase implements IPlayer {
             $this->setHealth(0);
         } else {
             foreach ($slot->getEntities() as $entity) {
+                if ($entity === $this->shape->getEntity()) continue;
                 $entity->collide($this);
             }
         }
