@@ -11,11 +11,7 @@ class GameServer {
     
     public function start(GameProcess $gameProcess, IGame $game): void {
         $this->gameProcess = $gameProcess;
-        $server = new Server("127.0.0.1", 8000);
-        $server->set([
-    		'ssl_cert_file' => __DIR__ . '/localhost+2.pem',
-    		'ssl_key_file' => __DIR__ . '/localhost+2-key.pem'
-		]);
+        $server = new Server("localhost", 80);
         $server->on('Start', $this->onStart(...));
         $server->on('Open', $this->onOpen(...));
         $server->on('Message', $this->onMessage(...));
