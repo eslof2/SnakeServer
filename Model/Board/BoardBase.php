@@ -29,7 +29,7 @@ abstract class BoardBase implements IBoard {
     public function getHeight(): int { return $this->height; }
     public function getSlot(int $x, int $y): ISlot { return $this->slots[$y][$x]; }
     /** @return ISlot[][] */
-    public function getSlots(): array { return $this->slots; }
+    public function getSlots(): \SplFixedArray { return $this->slots; }
     public function getWidth(): int { return $this->width; }
     public function tryGetEmptySlot(): ?ISlot {
         $emptySlots = [];
