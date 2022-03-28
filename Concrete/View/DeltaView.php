@@ -18,9 +18,9 @@ class DeltaView extends ViewBase {
         $isDelta = $serverTick - $lastTick == 1;
         if (!$isDelta) {
             if ($this->fullStateTick == $serverTick) return $this->fullState;
-            $toSerialize->board = $game->getBoardSlots();
+            $toSerialize->board = $game->getBoard()->getSlots();
             $toSerialize->players = $game->getPlayers();
-            $this->fullState = json_encode($game);
+            $this->fullState = json_encode($toSerialize);
             $this->fullStateTick = $serverTick;
             return $this->fullState;
         } elseif ($this->deltaStateTick == $serverTick) return $this->deltaState;
@@ -32,7 +32,7 @@ class DeltaView extends ViewBase {
             $toSerialize->players[] = $player;
             $player->setDirty(false);
         }
-        foreach ($game->getBoardSlots() as $y => $row) { //change to getBoardSlotArray (?)
+        foreach ($game->getBoard()->getSlots() as $y => $row) { //change to getBoardSlotArray (?)
             $deltaRow = [];
             foreach ($row as $x => $slot) {
                 if (!$slot->isDirty()) continue;

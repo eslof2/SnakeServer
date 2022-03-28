@@ -21,6 +21,6 @@ class Config {
     const INPUT_COL = 'input';
     const NAME_COL = 'name';
     public static function getDsn(): string {
-        return "mysql:host=".Config::HOST . ";dbname=".Config::DB.";charset=".Config::CHARSET.";port=".Config::PORT;
+        return "sqlite:".__DIR__."/snake.sqlite3;dbname=".Config::DB.";charset=".Config::CHARSET.";port=".Config::PORT;
     }
 }

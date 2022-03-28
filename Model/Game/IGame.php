@@ -8,8 +8,6 @@ use Model\Slot\ISlot;
 
 interface IGame {
     public function getBoard(): IBoard;
-    /** @return ISlot[][] */
-    public function getBoardSlots(): array;
     public function getPlayer(int $fd): IPlayer;
     /** @return IPlayer[] */
     public function getPlayers(): array;

@@ -44,7 +44,6 @@ abstract class GameBase implements IGame {
     }
 
     public function getBoard(): IBoard { return $this->board; }
-    public function getBoardSlots(): array { return $this->board->getSlots(); }
     public function getPlayer(int $fd): IPlayer { return $this->players[$fd]; }
     /** @return IPlayer[] */
     public function getPlayers(): array { return $this->players; }
@@ -64,7 +63,7 @@ abstract class GameBase implements IGame {
 
         //mostly for stopping memory leak in lastTickByFd
         foreach ($this->lastTickByFd as $fd => $tick) {
-            if (!$this->server->exist($fd)) $this->onDisconnect($fd);
+            //if (!$this->server->exist($fd)) $this->onDisconnect($fd);
         }
 
         /** @var array<string, IPlayer> */
@@ -98,13 +97,16 @@ abstract class GameBase implements IGame {
     }
 
     protected function broadcastState(): void {
+        $this->broadcastStateFor(1);
         foreach ($this->server->connections as $fd) $this->broadcastStateFor($fd);
     }
     protected function broadcastStateFor(int $fd): void {
-        if (!isset($fd, $this->lastTickByFd)) $this->lastTickByFd[$fd] = $this->time->tickCount - 2;
-        if (!($data = $this->view->serialize($this, $this->time->tickCount, $this->lastTickByFd[$fd]))) return;
-        $this->server->push($fd, $data);
+        if (!array_key_exists($fd, $this->lastTickByFd)) $this->lastTickByFd[$fd] = $this->time->tickCount - 2;
+        $data = $this->view->serialize($this, $this->time->tickCount, $this->lastTickByFd[$fd]);
         $this->lastTickByFd[$fd] = $this->time->tickCount;
+        if ($data === null) return;
+        //$this->server->push($fd, $data);
+        echo $data.PHP_EOL.PHP_EOL;
     }
 
     public function tryGetPlayer(int $fd): ?IPlayer {

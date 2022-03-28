@@ -45,4 +45,13 @@ abstract class SlotBase implements ISlot, JsonSerializable {
         }
         return false;
     }
+
+    public function setDirty($isDirty = true): void {
+        $this->isDirty = $isDirty;
+        if ($isDirty === false) {
+            foreach ($this->entities as $entity) {
+                $entity->setDirty(false);
+            }
+        }
+    }
 }
