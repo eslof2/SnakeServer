@@ -33,6 +33,7 @@ class GameProcess {
     }
 
     public function tryJoin(int $fd, mixed $data): bool {
+        echo "attempting to join".PHP_EOL;
         $playerTable = $this->playerTable;
         $fdStr = strval($fd);
         if (!isset($data->name) || !is_string($data->name) || trim($data->name) != '' || mb_strlen($data->name, "UTF-8") > Config::NAME_VARCHAR_MAX) return false;
@@ -40,6 +41,7 @@ class GameProcess {
         $this->inputTable->set($fdStr, [Config::INPUT_COL => Input::NONE]);
         $playerTable->set($fdStr, [Config::NAME_COL => $data->name]);
         $this->wakeUp();
+        echo "joined";
         return true;
     }
     
