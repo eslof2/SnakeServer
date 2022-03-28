@@ -11,7 +11,7 @@ class GameServer {
     
     public function start(GameProcess $gameProcess, IGame $game): void {
         $this->gameProcess = $gameProcess;
-        $server = new Server("0.0.0.0", 9502);
+        $server = new Server("0.0.0.0", 80);
         $server->on('Start', $this->onStart(...));
         $server->on('Open', $this->onOpen(...));
         $server->on('Message', $this->onMessage(...));
