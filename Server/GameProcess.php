@@ -70,13 +70,13 @@ class GameProcess {
             } catch (PDOException $e) {
                 $code = (int)$e->getCode();
                 $msg = $e->getMessage();
-                //error_log("PDO Error ($code): $msg");
-                //$this->atomicState->set(GameState::ERROR->value);
-                //$server->shutdown();
-                //return;
+                error_log("PDO Error ($code): $msg");
+                $this->atomicState->set(GameState::ERROR->value);
+                $server->shutdown();
+                return;
             }
 
-            $game->setUp($server, null, $this->playerTable, $this->inputTable, $this->atomicState);
+            $game->setUp($server, $pdo, $this->playerTable, $this->inputTable, $this->atomicState);
             new Engine($game, $this->atomicState);
             $this->atomicState->set(GameState::SHUTDOWN->value);
         });

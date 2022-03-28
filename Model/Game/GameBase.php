@@ -15,7 +15,7 @@ use Swoole\WebSocket\Server;
 
 abstract class GameBase implements IGame {
     protected Server $server;
-    protected ?PDO $database;
+    protected PDO $database;
     protected Table $playerTable;
     protected Table $inputTable;
     protected Atomic $atomicState;
@@ -35,7 +35,7 @@ abstract class GameBase implements IGame {
         $this->board->setGame($this);
     }
 
-    public function setUp(Server $server, ?PDO $database, Table $playerTable, Table $inputTable, Atomic $atomicState): void {
+    public function setUp(Server $server, PDO $database, Table $playerTable, Table $inputTable, Atomic $atomicState): void {
         $this->server = $server;
         $this->database = $database;
         $this->playerTable = $playerTable;
@@ -139,13 +139,13 @@ abstract class GameBase implements IGame {
     public abstract function onStart(): void;
 
     protected function onPlayerDeath(IPlayer $player): void {
-        //$sql = "INSERT INTO score (name, score) VALUES (:name, :score)";
-        //$prep = $this->database->prepare($sql);
+        $sql = "INSERT INTO score (name, score) VALUES (:name, :score)";
+        $prep = $this->database->prepare($sql);
         $name = $player->getName();
         $score = $player->getScore();
         echo $name." ".$score;
-        //$prep->bindParam("name", $name, PDO::PARAM_STR, Config::NAME_VARCHAR_MAX);
-        //$prep->bindParam("score", $score, PDO::PARAM_INT); // TODO: hard coded
-        //$prep->execute();
+        $prep->bindParam("name", $name, PDO::PARAM_STR, Config::NAME_VARCHAR_MAX);
+        $prep->bindParam("score", $score, PDO::PARAM_INT); // TODO: hard coded
+        $prep->execute();
     }
 }
