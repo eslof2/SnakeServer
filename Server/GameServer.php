@@ -11,7 +11,11 @@ class GameServer {
     
     public function start(GameProcess $gameProcess, IGame $game): void {
         $this->gameProcess = $gameProcess;
-        $server = new Server("0.0.0.0", 80);
+        $server = new Server("127.0.0.1", 8000);
+        $server->set([
+    		'ssl_cert_file' => __DIR__ . '/localhost+2.pem',
+    		'ssl_key_file' => __DIR__ . '/localhost+2-key.pem'
+		]);
         $server->on('Start', $this->onStart(...));
         $server->on('Open', $this->onOpen(...));
         $server->on('Message', $this->onMessage(...));
@@ -26,7 +30,8 @@ class GameServer {
     }
 
     protected function onOpen(Server $server, Request $request): void {
-        $server->send($request->fd, ["fd" => $request->fd]);
+    	echo "on open".PHP_EOL;
+        $server->send($request->fd, json_encode(["fd" => $request->fd]));
         $this->gameProcess->wakeUp();
     }
 

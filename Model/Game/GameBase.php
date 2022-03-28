@@ -63,7 +63,7 @@ abstract class GameBase implements IGame {
 
         //mostly for stopping memory leak in lastTickByFd
         foreach ($this->lastTickByFd as $fd => $tick) {
-            //if (!$this->server->exist($fd)) $this->onDisconnect($fd);
+            if (!$this->server->exist($fd)) $this->onDisconnect($fd);
         }
 
         /** @var array<string, IPlayer> */
@@ -105,8 +105,7 @@ abstract class GameBase implements IGame {
         $data = $this->view->serialize($this, $this->time->tickCount, $this->lastTickByFd[$fd]);
         $this->lastTickByFd[$fd] = $this->time->tickCount;
         if ($data === null) return;
-        //$this->server->push($fd, $data);
-        echo $data.PHP_EOL.PHP_EOL;
+        $this->server->push($fd, $data);
     }
 
     public function tryGetPlayer(int $fd): ?IPlayer {

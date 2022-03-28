@@ -28,8 +28,8 @@ class GameProcess {
         $inputTable->column(Config::INPUT_COL, Table::TYPE_INT, 4);       //1,2,4,8
         $inputTable->create();
         $this->atomicState = new Atomic(GameState::SHUTDOWN->value);
-        $playerTable->set("1", array(Config::NAME_COL => "john"));
-        $inputTable->set("1", array(Config::INPUT_COL => Input::NONE->value));
+        //$playerTable->set("1", array(Config::NAME_COL => "john"));
+        //$inputTable->set("1", array(Config::INPUT_COL => Input::NONE->value));
     }
 
     public function tryJoin(int $fd, mixed $data): bool {

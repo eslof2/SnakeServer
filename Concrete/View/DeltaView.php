@@ -16,7 +16,7 @@ class DeltaView extends ViewBase {
     //  and full state is just all entities regardless of dirty + gridSize (and max player)
     // managing full state vs delta state (aka only the changes from last) with cache
     public function serialize(IGame $game, int $serverTick, int $lastTick): string|null {
-        if ($lastTick >= $serverTick) throw new InternalMisuseException("Giving a lastTick >= serverTick.");
+        if ($lastTick > $serverTick) throw new InternalMisuseException("Giving a lastTick >= serverTick.");
         $isDelta = $serverTick - $lastTick == 1;
         if (!$isDelta) {
             $toSerialize = new \stdClass();
