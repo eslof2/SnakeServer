@@ -14,22 +14,25 @@ class DeltaView extends ViewBase {
     // managing full state vs delta state (aka only the changes from last) with cache
     public function serialize(IGame $game, int $serverTick, int $lastTick): string|null {
         if ($lastTick >= $serverTick) throw new InternalMisuseException("Giving a lastTick >= serverTick.");
-        $toSerialize = new \stdClass();
         $isDelta = $serverTick - $lastTick == 1;
         if (!$isDelta) {
+            $toSerialize = new \stdClass();
             if ($this->fullStateTick == $serverTick) return $this->fullState;
-            $toSerialize->board = $game->getBoard()->getSlots();
-            $toSerialize->players = $game->getPlayers();
+            $board = $game->getBoard()->getSlots();
+            $players = $game->getPlayers();
+            if (count($board) == 0) throw new InternalMisuseException("Serializing an empty full state board, only possible if board size is 0x0.");
+            $toSerialize->board = $board;
+            if (count($players) > 0) $toSerialize->players = $players;
             $this->fullState = json_encode($toSerialize);
             $this->fullStateTick = $serverTick;
             return $this->fullState;
         } elseif ($this->deltaStateTick == $serverTick) return $this->deltaState;
 
-        $toSerialize->board = [];
-        $toSerialize->players = [];
+        $board = [];
+        $players = [];
         foreach ($game->getPlayers() as $player) {
             if (!$player->isDirty()) continue;
-            $toSerialize->players[] = $player;
+            $players[] = $player;
             $player->setDirty(false);
         }
         foreach ($game->getBoard()->getSlots() as $y => $row) { //change to getBoardSlotArray (?)
@@ -40,11 +43,16 @@ class DeltaView extends ViewBase {
                 $slot->setDirty(false);
             }
             if (count($deltaRow) == 0) continue;
-            $toSerialize->board[$y] = $deltaRow;
+            $board[$y] = $deltaRow;
         }
 
-        if (count($toSerialize->board) + count($toSerialize->players) == 0) $this->deltaState = null;
-        else $this->deltaState = json_encode($toSerialize);
+        if (count($board) + count($players) == 0) $this->deltaState = null;
+        else {
+            $toSerialize = new \stdClass();
+            if (count($board) > 0) $toSerialize->board = $board;
+            if (count($players) > 0) $toSerialize->players = $players;
+            $this->deltaState = json_encode($toSerialize);
+        }
         $this->deltaStateTick = $serverTick;
         return $this->deltaState;
     }
