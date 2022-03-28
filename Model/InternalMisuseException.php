@@ -1,7 +1,6 @@
 <?php
 
 namespace Model;
-
 use Exception;
 use Throwable;
 

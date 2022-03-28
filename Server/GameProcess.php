@@ -5,8 +5,8 @@ use Concrete\Engine\Engine;
 use Model\Game\IGame;
 use Model\GameState;
 use Model\Player\Input;
-use PDOException;
 use PDO;
+use PDOException;
 use Swoole\Atomic;
 use Swoole\Process;
 use Swoole\Table;
@@ -28,32 +28,29 @@ class GameProcess {
         $inputTable->column(Config::INPUT_COL, Table::TYPE_INT, 4);       //1,2,4,8
         $inputTable->create();
         $this->atomicState = new Atomic(GameState::SHUTDOWN->value);
-        //$playerTable->set("1", array(Config::NAME_COL => "john"));
-        //$inputTable->set("1", array(Config::INPUT_COL => Input::NONE->value));
     }
 
     public function tryJoin(int $fd, mixed $data): bool {
         echo "attempting to join".PHP_EOL;
         $playerTable = $this->playerTable;
         $fdStr = strval($fd);
-        if (!isset($data->name) || !is_string($data->name) || trim($data->name) != '' || mb_strlen($data->name, "UTF-8") > Config::NAME_VARCHAR_MAX) return false;
+        if (!isset($data->name) || !is_string($data->name) || trim($data->name) == '' || mb_strlen($data->name, "UTF-8") > Config::NAME_VARCHAR_MAX) return false;
         if ($playerTable->exist($fdStr) || $playerTable->count() >= Config::CONCURRENT_MAX) return false;
-        $this->inputTable->set($fdStr, [Config::INPUT_COL => Input::NONE]);
+        $this->inputTable->set($fdStr, [Config::INPUT_COL => Input::NONE->value]);
         $playerTable->set($fdStr, [Config::NAME_COL => $data->name]);
         $this->wakeUp();
-        echo "joined";
         return true;
     }
-    
+
     public function wakeUp(): void {
         if ($this->atomicState->get() == GameState::WAITING->value) $this->atomicState->wakeup();
     }
-    
+
     public function tryInput(int $fd, mixed $data): bool {
         $fdStr = strval($fd);
         if (!isset($data->input) || !is_int($data->input) || !($input = Input::tryFrom($data->input))) return false;
         if (!$this->playerTable->exist($fdStr)) return false;
-        $this->inputTable->set($fdStr, [Config::INPUT_COL => $input]);
+        $this->inputTable->set($fdStr, [Config::INPUT_COL => $input->value]);
         return true;
     }
 
@@ -68,7 +65,7 @@ class GameProcess {
             $this->atomicState->set(GameState::STARTING->value);
 
             try {
-                $pdo = new PDO(Config::getDsn(), options: Config::OPTIONS);
+                $pdo = new PDO(Config::PDO_DNS, options: Config::PDO_OPTIONS);
             } catch (PDOException $e) {
                 $code = (int)$e->getCode();
                 $msg = $e->getMessage();

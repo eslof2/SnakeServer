@@ -10,10 +10,7 @@ abstract class BoardBase implements IBoard {
     /** @var ISlot[][] */
     protected SplFixedArray $slots;
 
-    public function __construct(
-        protected int $width,
-        protected int $height
-    ) {
+    public function __construct(protected int $width, protected int $height) {
         $this->slots = new SplFixedArray($this->width);
         for ($x = 0; $x < $this->height; $x++) {
             $this->slots[$x] = new SplFixedArray($this->height);
@@ -22,14 +19,14 @@ abstract class BoardBase implements IBoard {
             }
         }
     }
-    
+
     protected abstract function getNewSlot(int $x, int $y): ISlot;
     public function getGame(): IGame { return $this->game; }
     public function setGame(IGame $game): void { $this->game = $game; }
     public function getHeight(): int { return $this->height; }
     public function getSlot(int $x, int $y): ISlot { return $this->slots[$y][$x]; }
     /** @return ISlot[][] */
-    public function getSlots(): \SplFixedArray { return $this->slots; }
+    public function getSlots(): SplFixedArray { return $this->slots; }
     public function getWidth(): int { return $this->width; }
     public function tryGetEmptySlot(): ?ISlot {
         $emptySlots = [];

@@ -13,7 +13,7 @@ abstract class ShapeBase implements IShape {
     protected int $size;
 
     public final function tryInstantiate(IBoard $board, ?int $x = null, ?int $y = null, Direction $direction = null, int $size = 3): bool {
-    	$this->size = $size;
+        $this->size = $size;
         $this->board = $board;
         if ($x === null || $y === null) {
             if (!($newSlot = $this->board->tryGetEmptySlot())) return false;
@@ -24,9 +24,9 @@ abstract class ShapeBase implements IShape {
         return true;
     }
 
+    protected abstract function instantiate(ISlot $slot, ?Direction $direction = null): void;
     public abstract function tryGetSlot(): ?ISlot;
     public abstract function getEntity(): IEntity;
-    protected abstract function instantiate(ISlot $slot, ?Direction $direction = null): void;
     public function addSize(int $value): void { $this->size += $value; }
     public function getSize(): int { return $this->size; }
     public abstract function destroy(): void;

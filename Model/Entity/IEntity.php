@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 
 namespace Model\Entity;
+use Closure;
 use Model\Direction;
 use Model\Dirty\IDirty;
 use Model\Player\IPlayer;
@@ -12,7 +13,7 @@ interface IEntity extends IDirty {
     public function getDirection(): Direction;
     public function getEntityType(): EntityType;
     /** @param null|Closure(IEntity, IPlayer):void $onCollide */
-    public function setCollideCallback(?\Closure $onCollide): void; //TODO: abstract callback pattern
+    public function setCollideCallback(?Closure $onCollide): void; //TODO: abstract callback pattern
     public function setDirection(Direction $direction): void;
     public function setSlot(?ISlot $slot): void;
     public function detachFromSlot(): void;

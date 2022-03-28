@@ -15,7 +15,7 @@ class NormalPlayerShape extends ShapeBase {
     /** @var PlayerEntity[] $bodyEntities */
     protected array $bodyEntities = [];
 
-    public function __construct(protected int $fd) {}
+    public function __construct(protected int $fd) { }
 
     public function destroy(): void {
         if ($this->headEntity === null) throw new InternalMisuseException("Destroy for PlayerShape destroyed or not instantiated.");
@@ -53,11 +53,6 @@ class NormalPlayerShape extends ShapeBase {
         return $this->headEntity->getDirection()->rotate($input);
     }
 
-    public function tryGetSlot(): ?ISlot {
-        if ($this->headEntity === null) throw new InternalMisuseException("GetSlot for PlayerShape destroyed or not instantiated.");
-        return $this->headEntity->tryGetSlot();
-    }
-
     protected function moveHead(?ISlot $newSlot, Direction $direction): ?ISlot {
         $headEntity = $this->headEntity;
         $headEntity->setDirection($direction);
@@ -89,6 +84,16 @@ class NormalPlayerShape extends ShapeBase {
         return $lastBody;
     }
 
+    public function tryGetSlot(): ?ISlot {
+        if ($this->headEntity === null) throw new InternalMisuseException("GetSlot for PlayerShape destroyed or not instantiated.");
+        return $this->headEntity->tryGetSlot();
+    }
+
+    public function getEntity(): IEntity {
+        if ($this->headEntity === null) throw new InternalMisuseException("getEntity for PlayerShape destroyed or not instantiated.");
+        return $this->headEntity;
+    }
+
     protected function instantiate(ISlot $slot, ?Direction $direction = null): void {
         $x = $y = 0;
         $slot->getPosition(outX: $x, outY: $y);
@@ -97,10 +102,5 @@ class NormalPlayerShape extends ShapeBase {
         $entity->setDirection($direction);
         $slot->add($entity);
         $this->headEntity = $entity;
-    }
-
-    public function getEntity(): IEntity {
-        if ($this->headEntity === null) throw new InternalMisuseException("getEntity for PlayerShape destroyed or not instantiated.");
-        return $this->headEntity;
     }
 }

@@ -29,11 +29,9 @@ abstract class GameBase implements IGame {
     public function __construct(
         protected IBoard $board,
         protected int $maxPlayerCount,
-        protected int $tickRateNs = 1000000000,
+        protected int $tickRateNs = 333333333,
         protected float $timeScale = 1
-    ) {
-        $this->board->setGame($this);
-    }
+    ) { $this->board->setGame($this); }
 
     public function setUp(Server $server, PDO $database, Table $playerTable, Table $inputTable, Atomic $atomicState): void {
         $this->server = $server;
@@ -50,7 +48,6 @@ abstract class GameBase implements IGame {
     public function setTimeScale(float $timeScale): void { $this->timeScale = $timeScale; }
     public function getTickRateNs(): int { return $this->tickRateNs; }
     public function getTimeScale(): float { return $this->timeScale; }
-
     public function process(): void {
         // even if there's no connections there can still be active snakes that will die and submit score
         if ($this->playerTable->count() == 0 && count($this->players) == 0) {
@@ -75,6 +72,7 @@ abstract class GameBase implements IGame {
             }
 
             $player->setInput(Input::from($this->inputTable->get($fdStr, Config::INPUT_COL)));
+            $this->inputTable->set($fdStr, [Config::INPUT_COL => Input::NONE->value]);
         }
 
         foreach ($this->players as $p) $p->processMovement();
@@ -99,14 +97,19 @@ abstract class GameBase implements IGame {
     protected function broadcastState(): void {
         foreach ($this->server->connections as $fd) $this->broadcastStateFor($fd);
     }
+
     protected function broadcastStateFor(int $fd): void {
-        if (!array_key_exists($fd, $this->lastTickByFd)) $this->lastTickByFd[$fd] = $this->time->tickCount - 2;
+        if (!array_key_exists($fd, $this->lastTickByFd)) {
+            $this->lastTickByFd[$fd] = $this->time->tickCount - 2;
+            $this->server->push($fd, json_encode(['fd' => $fd]));
+        }
         $data = $this->view->serialize($this, $this->time->tickCount, $this->lastTickByFd[$fd]);
         $this->lastTickByFd[$fd] = $this->time->tickCount;
         if ($data === null) return;
         $this->server->push($fd, $data);
     }
 
+    public function onDisconnect(int $fd): void { unset($this->lastTickByFd[$fd]); }
     public function tryGetPlayer(int $fd): ?IPlayer {
         if (!array_key_exists($fd, $this->players)) return null;
         return $this->players[$fd];
@@ -115,7 +118,6 @@ abstract class GameBase implements IGame {
     //we let inherit class decide what class of player
     //really we should probably be using an abstracted factory pattern
     protected abstract function getNewPlayer(int $fd, string $name): IPlayer;
-
     public function tryAddPlayer(IPlayer $player): bool {
         $fd = $player->getFd();
         $player->setBoard($this->board);
@@ -125,23 +127,17 @@ abstract class GameBase implements IGame {
         return true;
     }
 
-    public function onDisconnect(int $fd): void {
-        unset($this->lastTickByFd[$fd]);
-    }
-
     public final function start(Time $time): void {
         $this->time = $time;
         $this->onStart();
     }
 
     public abstract function onStart(): void;
-
     protected function onPlayerDeath(IPlayer $player): void {
         $sql = "INSERT INTO score (name, score) VALUES (:name, :score)";
         $prep = $this->database->prepare($sql);
         $name = $player->getName();
         $score = $player->getScore();
-        echo $name." ".$score;
         $prep->bindParam("name", $name, PDO::PARAM_STR, Config::NAME_VARCHAR_MAX);
         $prep->bindParam("score", $score, PDO::PARAM_INT); // TODO: hard coded
         $prep->execute();

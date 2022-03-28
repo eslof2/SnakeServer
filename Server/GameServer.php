@@ -8,7 +8,7 @@ use Swoole\WebSocket\Server;
 
 class GameServer {
     protected GameProcess $gameProcess;
-    
+
     public function start(GameProcess $gameProcess, IGame $game): void {
         $this->gameProcess = $gameProcess;
         $server = new Server("localhost", 80);
@@ -26,8 +26,7 @@ class GameServer {
     }
 
     protected function onOpen(Server $server, Request $request): void {
-    	echo "on open".PHP_EOL;
-        $server->send($request->fd, json_encode(["fd" => $request->fd]));
+        echo "on open".PHP_EOL;
         $this->gameProcess->wakeUp();
     }
 
@@ -41,5 +40,5 @@ class GameServer {
         };
     }
 
-    protected function onClose(Server $server, int $fd): void {}
+    protected function onClose(Server $server, int $fd): void { echo "on open".PHP_EOL; }
 }

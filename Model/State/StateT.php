@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace Model\State;
 use Model\Dirty\DirtyT;
 

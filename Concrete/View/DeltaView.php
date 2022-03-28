@@ -4,6 +4,7 @@ namespace Concrete\View;
 use Model\Game\IGame;
 use Model\InternalMisuseException;
 use Model\View\ViewBase;
+use stdClass;
 
 class DeltaView extends ViewBase {
     private int $fullStateTick = -1;
@@ -19,7 +20,7 @@ class DeltaView extends ViewBase {
         if ($lastTick > $serverTick) throw new InternalMisuseException("Giving a lastTick >= serverTick.");
         $isDelta = $serverTick - $lastTick == 1;
         if (!$isDelta) {
-            $toSerialize = new \stdClass();
+            $toSerialize = new stdClass();
             if ($this->fullStateTick == $serverTick) return $this->fullState;
             $board = $game->getBoard()->getSlots();
             $players = $game->getPlayers();
@@ -51,7 +52,7 @@ class DeltaView extends ViewBase {
 
         if (count($board) + count($players) == 0) $this->deltaState = null;
         else {
-            $toSerialize = new \stdClass();
+            $toSerialize = new stdClass();
             if (count($board) > 0) $toSerialize->board = $board;
             if (count($players) > 0) $toSerialize->players = $players;
             $this->deltaState = json_encode($toSerialize);

@@ -1,7 +1,6 @@
 <?php declare(strict_types=1);
 
 namespace Model\State;
-
 use Model\Dirty\IDirty;
 
 interface IState extends IDirty {

@@ -15,7 +15,7 @@ abstract class SlotBase implements ISlot, JsonSerializable {
     /** @var IEntity[] $entities */
     protected array $entities = [];
 
-    public function __construct(protected IBoard $board, protected int $x, protected int $y) {}
+    public function __construct(protected IBoard $board, protected int $x, protected int $y) { }
 
     public function add(IEntity $entity): void {
         $key = spl_object_id($entity);
@@ -23,6 +23,15 @@ abstract class SlotBase implements ISlot, JsonSerializable {
         $this->entities[$key] = $entity;
         $entity->setSlot($this);
         $this->setDirty();
+    }
+
+    public function setDirty($isDirty = true): void {
+        $this->isDirty = $isDirty;
+        if ($isDirty === false) {
+            foreach ($this->entities as $entity) {
+                $entity->setDirty(false);
+            }
+        }
     }
 
     public function remove(IEntity $entity): void {
@@ -44,14 +53,5 @@ abstract class SlotBase implements ISlot, JsonSerializable {
             if ($entity->isDirty()) return true;
         }
         return false;
-    }
-
-    public function setDirty($isDirty = true): void {
-        $this->isDirty = $isDirty;
-        if ($isDirty === false) {
-            foreach ($this->entities as $entity) {
-                $entity->setDirty(false);
-            }
-        }
     }
 }

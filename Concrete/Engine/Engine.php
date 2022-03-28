@@ -28,7 +28,7 @@ class Engine {
             $remainder = $this->timeExpected - $time->deltaNs; // ex process()+sleep(1) took 1.1s = 0.1s to compensate for
 
             $targetSleepTime = $game->getTickRateNs() / $game->getTimeScale(); // what the game logic asks for
-            $nextExpected = max($targetSleepTime - $remainder, 0); // minus compensation
+            $nextExpected = min(max($targetSleepTime - $remainder, 0), $targetSleepTime); // minus compensation
 
             $this->timeExpected = $nextExpected;
         }

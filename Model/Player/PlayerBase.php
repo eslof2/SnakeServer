@@ -1,10 +1,9 @@
 <?php declare(strict_types=1);
 
 namespace Model\Player;
-use Concrete\NormalMode\NormalPlayerShape;
+use Closure;
 use Model\Board\IBoard;
 use Model\Direction;
-use Model\Dirty\DirtyT;
 use Model\Shape\IShape;
 use Model\State\StateT;
 
@@ -15,29 +14,14 @@ abstract class PlayerBase implements IPlayer {
     protected Input $input;
     protected IShape $shape;
     /** @var null|Closure(IPlayer):void */
-    protected ?\Closure $deathCallback;
+    protected ?Closure $deathCallback;
 
-    public function __construct(
-        public int $fd,
-        public string $name
-    ) {}
+    public function __construct(public int $fd,public string $name) { }
 
-    public function getFd(): int {
-        return $this->fd;
-    }
-
-    public function getName(): string {
-        return $this->name;
-    }
-
-    public function getShape(): IShape {
-        return $this->shape;
-    }
-
-    public function processMovement(): void {
-        $this->shape->move($this->input);
-    }
-
+    public function getFd(): int { return $this->fd; }
+    public function getName(): string { return $this->name; }
+    public function getShape(): IShape { return $this->shape; }
+    public function processMovement(): void { $this->shape->move($this->input); }
     public function processCollision(): void {
         $thisEntity = $this->shape->getEntity();
         $slot = $thisEntity->tryGetSlot();
@@ -56,11 +40,8 @@ abstract class PlayerBase implements IPlayer {
         }
     }
 
-    public function setBoard(IBoard $board): void {
-        $this->board = $board;
-    }
-
-    public function setDeathCallback(?\Closure $onDeath): void {
+    public function setBoard(IBoard $board): void { $this->board = $board; }
+    public function setDeathCallback(?Closure $onDeath): void {
         $this->deathCallback = $onDeath;
     }
 

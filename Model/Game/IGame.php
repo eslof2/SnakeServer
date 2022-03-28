@@ -4,7 +4,6 @@ namespace Model\Game;
 use Concrete\Engine\Time;
 use Model\Board\IBoard;
 use Model\Player\IPlayer;
-use Model\Slot\ISlot;
 
 interface IGame {
     public function getBoard(): IBoard;

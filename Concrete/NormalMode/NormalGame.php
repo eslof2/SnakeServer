@@ -3,6 +3,7 @@
 namespace Concrete\NormalMode;
 use Concrete\Entity\FoodEntity;
 use Concrete\View\DeltaView;
+use Exception;
 use Model\Entity\IEntity;
 use Model\Game\GameBase;
 use Model\Player\IPlayer;
@@ -23,8 +24,10 @@ class NormalGame extends GameBase {
 
     protected function foodLoop(IEntity $consumable = null, IPlayer $player = null) {
         $this->food?->detachFromSlot();
-        if (!($newSlot = $this->board->tryGetEmptySlot())) throw new \Exception("Board is full of snake.");
+        if (!($newSlot = $this->board->tryGetEmptySlot())) throw new Exception("Board is full of snake.");
         $food = $this->food = new FoodEntity();
+        $food->sizeValue = rand(1, 2);
+        $food->scoreValue = rand(1, 2);
         $food->setCollideCallback($this->foodLoop(...));
         $newSlot->add($this->food);
     }
