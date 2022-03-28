@@ -57,8 +57,8 @@ abstract class GameBase implements IGame {
             // otherwise we wait for wakeup signals from websocket requests
             $this->atomicState->set(GameState::WAITING->value);
             $this->atomicState->wait(0); //waiting indefinitely for new connections
-            $this->time->tickCount--; //not doing game ticks as we're empty todo: make this cleaner
             $this->broadcastState();
+            $this->time->tickCount--; //not doing game ticks as we're empty todo: make this cleaner
             return;
         }
 
