@@ -58,7 +58,6 @@ abstract class GameBase implements IGame {
             $this->atomicState->set(GameState::WAITING->value);
             $this->atomicState->wait(0); //waiting indefinitely for new connections
             $this->broadcastState();
-            $this->time->tickCount--; //not doing game ticks as we're empty todo: make this cleaner
             return;
         }
 
@@ -98,7 +97,6 @@ abstract class GameBase implements IGame {
     }
 
     protected function broadcastState(): void {
-        $this->broadcastStateFor(1);
         foreach ($this->server->connections as $fd) $this->broadcastStateFor($fd);
     }
     protected function broadcastStateFor(int $fd): void {
