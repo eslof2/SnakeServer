@@ -5,12 +5,12 @@ namespace Server;
 use PDO;
 
 class Config {
-    const HOST = '127.0.0.1';
-    const DB = 'snake';
+    //const HOST = '127.0.0.1';
+    //const DB = 'snake';
     const USER = 'root';
     const PASS = 'root';
-    const PORT = "3307";
-    const CHARSET = 'utf8mb4';
+    //const PORT = "3307";
+    //const CHARSET = 'utf8mb4';
     const OPTIONS = [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -21,6 +21,6 @@ class Config {
     const INPUT_COL = 'input';
     const NAME_COL = 'name';
     public static function getDsn(): string {
-        return "sqlite:".__DIR__."/snake.sqlite3;dbname=".Config::DB.";charset=".Config::CHARSET.";port=".Config::PORT;
+        return "sqlite:".__DIR__."/snake.sqlite3";
     }
 }

@@ -66,7 +66,7 @@ class GameProcess {
             $this->atomicState->set(GameState::STARTING->value);
 
             try {
-                $pdo = new PDO(Config::getDsn(), Config::USER, Config::PASS, Config::OPTIONS);
+                $pdo = new PDO(Config::getDsn(), options: Config::OPTIONS);
             } catch (PDOException $e) {
                 $code = (int)$e->getCode();
                 $msg = $e->getMessage();
