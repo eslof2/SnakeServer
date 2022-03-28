@@ -11,6 +11,9 @@ class DeltaView extends ViewBase {
     private int $deltaStateTick = -1;
     private ?string $deltaState;
 
+    // todo: keep track of all entities instead of iterating slots
+    // todo: send entity with x and y, more optimal over wire
+    //  and full state is just all entities regardless of dirty + gridSize (and max player)
     // managing full state vs delta state (aka only the changes from last) with cache
     public function serialize(IGame $game, int $serverTick, int $lastTick): string|null {
         if ($lastTick >= $serverTick) throw new InternalMisuseException("Giving a lastTick >= serverTick.");
