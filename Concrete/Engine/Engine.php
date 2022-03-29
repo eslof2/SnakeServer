@@ -25,10 +25,10 @@ class Engine {
             $time->update(); //tracks the difference in time between its calls (deltaNs)
 
             //the remainder ends up being how long it took for $game->process(); to execute
-            $remainder = $this->timeExpected - $time->deltaNs; // ex process()+sleep(1) took 1.1s = 0.1s to compensate for
+            $remainder = $time->deltaNs - $this->timeExpected; // ex process()+sleep(1) took 1.1s = 0.1s to compensate for
 
             $targetSleepTime = $game->getTickRateNs() / $game->getTimeScale(); // what the game logic asks for
-            $remainder = $remainder > $targetSleepTime ?: 0; //the game was (probably) paused todo: build this into Time
+            $remainder = $remainder <= $targetSleepTime ?: 0; //gone to sleep maybe todo: look into it
             $nextExpected = $targetSleepTime - $remainder; // minus compensation
 
             $this->timeExpected = $nextExpected;
