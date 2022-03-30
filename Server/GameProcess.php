@@ -19,7 +19,7 @@ class GameProcess {
     private Table $playerTable;
 
     public function __construct() {
-        // These are objects for multi-threading/processing ICP:
+        // These are objects for multi-threading/processing IPC:
         // Table is a shared memory db.
         // Atomic is a shared memory lock/counter/state machine.
         $playerTable = $this->playerTable = new Table(Config::CONCURRENT_MAX);
