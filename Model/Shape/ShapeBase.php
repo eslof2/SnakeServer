@@ -4,6 +4,7 @@ namespace Model\Shape;
 use Model\Board\IBoard;
 use Model\Direction;
 use Model\Entity\IEntity;
+use Model\Log;
 use Model\Player\Input;
 use Model\Slot\ISlot;
 
@@ -15,12 +16,14 @@ abstract class ShapeBase implements IShape {
     public final function tryInstantiate(IBoard $board, ?int $x = null, ?int $y = null, Direction $direction = null, int $size = 3): bool {
         $this->size = $size;
         $this->board = $board;
+        Log::Message("Attempting to instantiate player.");
         if ($x === null || $y === null) {
             if (!($newSlot = $this->board->tryGetEmptySlot())) return false;
         } elseif (!($newSlot = $this->board->tryGetSlot($x, $y)) || !$newSlot->isEmpty()) return false;
         $x = $y = 0;
         $newSlot->getPosition(outX: $x, outY: $y);
         $this->instantiate($newSlot, $direction);
+        Log::Message("Player instantiation successful.");
         return true;
     }
 
