@@ -3,6 +3,7 @@
 namespace Concrete\Engine;
 use Model\Game\IGame;
 use Model\GameState;
+use Model\Log;
 use Swoole\Atomic;
 
 class Engine {

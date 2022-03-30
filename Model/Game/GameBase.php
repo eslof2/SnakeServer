@@ -4,6 +4,7 @@ namespace Model\Game;
 use Concrete\Engine\Time;
 use Model\Board\IBoard;
 use Model\GameState;
+use Model\Log;
 use Model\Player\Input;
 use Model\Player\IPlayer;
 use Model\View\IView;
@@ -53,7 +54,9 @@ abstract class GameBase implements IGame {
         if ($this->playerTable->count() == 0 && count($this->players) == 0) {
             // otherwise we wait for wakeup signals from websocket requests
             $this->atomicState->set(GameState::WAITING->value);
+            Log::Message("No active players, server put in sleep/wait mode.");
             $this->atomicState->wait(0); //waiting indefinitely for new connections
+            Log::Message("Server woken up from sleep/wait mode.");
             $this->broadcastState();
             return;
         }
@@ -101,6 +104,7 @@ abstract class GameBase implements IGame {
     protected function broadcastStateFor(int $fd): void {
         if (!array_key_exists($fd, $this->lastTickByFd)) {
             $this->lastTickByFd[$fd] = $this->time->tickCount - 2;
+            Log::Message("New connection, sending id to client for id: ".$fd);
             $this->server->push($fd, json_encode(['fd' => $fd]));
         }
         $data = $this->view->serialize($this, $this->time->tickCount, $this->lastTickByFd[$fd]);
@@ -109,7 +113,9 @@ abstract class GameBase implements IGame {
         $this->server->push($fd, $data);
     }
 
-    public function onDisconnect(int $fd): void { unset($this->lastTickByFd[$fd]); }
+    public function onDisconnect(int $fd): void {
+        unset($this->lastTickByFd[$fd]);
+    }
     public function tryGetPlayer(int $fd): ?IPlayer {
         if (!array_key_exists($fd, $this->players)) return null;
         return $this->players[$fd];
@@ -119,16 +125,19 @@ abstract class GameBase implements IGame {
     //really we should probably be using an abstracted factory pattern
     protected abstract function getNewPlayer(int $fd, string $name): IPlayer;
     public function tryAddPlayer(IPlayer $player): bool {
+        Log::Message("Attempting to add player to game with id: ".$player->getFd());
         $fd = $player->getFd();
         $player->setBoard($this->board);
         if (!$player->tryInstantiate()) return false;
         $player->setDeathCallback($this->onPlayerDeath(...));
         $this->players[$fd] = $player;
+        Log::Message("Player added to game with id: ".$player->getFd());
         return true;
     }
 
     public final function start(Time $time): void {
         $this->time = $time;
+        Log::Message("Game has started.");
         $this->onStart();
     }
 
@@ -138,6 +147,7 @@ abstract class GameBase implements IGame {
         $prep = $this->database->prepare($sql);
         $name = $player->getName();
         $score = $player->getScore();
+        Log::Message("Player death, sending name and score for id: ".$player->getFd());
         $prep->bindParam("name", $name, PDO::PARAM_STR, Config::NAME_VARCHAR_MAX);
         $prep->bindParam("score", $score, PDO::PARAM_INT); // TODO: hard coded
         $prep->execute();

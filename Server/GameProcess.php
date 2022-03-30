@@ -4,6 +4,7 @@ namespace Server;
 use Concrete\Engine\Engine;
 use Model\Game\IGame;
 use Model\GameState;
+use Model\Log;
 use Model\Player\Input;
 use PDO;
 use PDOException;
@@ -31,11 +32,12 @@ class GameProcess {
     }
 
     public function tryJoin(int $fd, mixed $data): bool {
-        echo "attempting to join".PHP_EOL;
+        Log::Message("Attempting to join with id: ".$fd);
         $playerTable = $this->playerTable;
         $fdStr = strval($fd);
         if (!isset($data->name) || !is_string($data->name) || trim($data->name) == '' || mb_strlen($data->name, "UTF-8") > Config::NAME_VARCHAR_MAX) return false;
         if ($playerTable->exist($fdStr) || $playerTable->count() >= Config::CONCURRENT_MAX) return false;
+        Log::Message("Joining game with id: ".$fd);
         $this->inputTable->set($fdStr, [Config::INPUT_COL => Input::NONE->value]);
         $playerTable->set($fdStr, [Config::NAME_COL => $data->name]);
         $this->wakeUp();
@@ -74,7 +76,7 @@ class GameProcess {
                 $server->shutdown();
                 return;
             }
-
+            Log::Message("Starting game loop.");
             $game->setUp($server, $pdo, $this->playerTable, $this->inputTable, $this->atomicState);
             new Engine($game, $this->atomicState);
             $this->atomicState->set(GameState::SHUTDOWN->value);
