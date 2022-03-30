@@ -104,7 +104,7 @@ abstract class GameBase implements IGame {
     protected function broadcastStateFor(int $fd): void {
         if (!array_key_exists($fd, $this->lastTickByFd)) {
             $this->lastTickByFd[$fd] = $this->time->tickCount - 2;
-            Log::Message("New connection, sending id to client for id: ".$fd);
+            Log::Message("New connection, sending id to client and beginning data stream for id: ".$fd);
             $this->server->push($fd, json_encode(['fd' => $fd]));
         }
         $data = $this->view->serialize($this, $this->time->tickCount, $this->lastTickByFd[$fd]);
