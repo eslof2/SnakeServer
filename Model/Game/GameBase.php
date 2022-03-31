@@ -72,12 +72,8 @@ abstract class GameBase implements IGame {
         foreach ($this->playerTable as $fdStr => $row) {
             $fd = intval($fdStr);
             if (!($player = $this->tryGetPlayer($fd))) {
-<<<<<<< Updated upstream
-                $player = $newPlayers[$fdStr] = $this->getNewPlayer($fd, $row[Config::NAME_COL]);
-=======
                 Log::Message("New player detected from join request for id: ".$fdStr);
-                $player = $newPlayers[$fdStr] = $this->playerFactory->getNewInstance($fd, $row[Config::NAME_COL]);
->>>>>>> Stashed changes
+                $player = $newPlayers[$fdStr] = $this->getNewPlayer($fd, $row[Config::NAME_COL]);
             }
 
             $player->setInput(Input::from($this->inputTable->get($fdStr, Config::INPUT_COL)));
