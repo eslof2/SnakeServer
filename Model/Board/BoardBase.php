@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 
 namespace Model\Board;
+use Concrete\Factory\SlotFactory;
 use Model\Game\IGame;
 use Model\Slot\ISlot;
 use SplFixedArray;
@@ -10,17 +11,16 @@ abstract class BoardBase implements IBoard {
     /** @var ISlot[][] */
     protected SplFixedArray $slots;
 
-    public function __construct(protected int $width, protected int $height) {
+    public function __construct(protected int $width, protected int $height, SlotFactory $slotFactory) {
         $this->slots = new SplFixedArray($this->width);
         for ($x = 0; $x < $this->height; $x++) {
             $this->slots[$x] = new SplFixedArray($this->height);
             for ($y = 0; $y < $this->width; $y++) {
-                $this->slots[$x][$y] = $this->getNewSlot($x, $y);
+                $this->slots[$x][$y] = $slotFactory->getNewInstance($x, $y);
             }
         }
     }
 
-    protected abstract function getNewSlot(int $x, int $y): ISlot;
     public function getGame(): IGame { return $this->game; }
     public function setGame(IGame $game): void { $this->game = $game; }
     public function getHeight(): int { return $this->height; }

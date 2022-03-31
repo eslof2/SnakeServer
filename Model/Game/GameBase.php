@@ -2,6 +2,7 @@
 
 namespace Model\Game;
 use Concrete\Engine\Time;
+use Concrete\Factory\PlayerFactory;
 use Model\Board\IBoard;
 use Model\GameState;
 use Model\Log;
@@ -22,13 +23,14 @@ abstract class GameBase implements IGame {
     protected Atomic $atomicState;
     /** @var IPlayer[] $players TODO: set up "fd to id" and use SplFixedArray where id == index */
     protected array $players = [];
-    protected IView $view;
     protected Time $time;
     /** @var array<int, int> $lastTickByFd */
     protected array $lastTickByFd = [];
 
     public function __construct(
         protected IBoard $board,
+        protected IView $view,
+        protected PlayerFactory $playerFactory,
         protected int $maxPlayerCount,
         protected int $tickRateNs = 333333333,
         protected float $timeScale = 1
@@ -71,7 +73,7 @@ abstract class GameBase implements IGame {
         foreach ($this->playerTable as $fdStr => $row) {
             $fd = intval($fdStr);
             if (!($player = $this->tryGetPlayer($fd))) {
-                $player = $newPlayers[$fdStr] = $this->getNewPlayer($fd, $row[Config::NAME_COL]);
+                $player = $newPlayers[$fdStr] = $this->playerFactory->getNewInstance($fd, $row[Config::NAME_COL]);
             }
 
             $player->setInput(Input::from($this->inputTable->get($fdStr, Config::INPUT_COL)));
@@ -121,9 +123,6 @@ abstract class GameBase implements IGame {
         return $this->players[$fd];
     }
 
-    //we let inherit class decide what class of player
-    //really we should probably be using an abstracted factory pattern
-    protected abstract function getNewPlayer(int $fd, string $name): IPlayer;
     public function tryAddPlayer(IPlayer $player): bool {
         Log::Message("Attempting to add player to game with id: ".$player->getFd());
         $fd = $player->getFd();
