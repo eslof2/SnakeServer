@@ -51,7 +51,8 @@ abstract class GameBase implements IGame {
     public function getTimeScale(): float { return $this->timeScale; }
     public function process(): void {
         // even if there's no connections there can still be active snakes that will die and submit score
-        if ($this->playerTable->count() == 0 && count($this->players) == 0) {
+        // TODO: can we just check the count of this->players?
+        if (count($this->players) == 0 && $this->playerTable->count() == 0) {
             // otherwise we wait for wakeup signals from websocket requests
             Log::Message("No active players, server put in sleep/wait mode.");
             $this->atomicState->set(GameState::WAITING->value);
