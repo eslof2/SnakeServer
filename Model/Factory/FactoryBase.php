@@ -17,6 +17,6 @@ abstract class FactoryBase implements IFactory {
 
     /** @return T */
     public function getNewInstance(...$arguments): mixed {
-        return new $this->classString($arguments);
+        return new $this->classString(...$arguments);
     }
 }
