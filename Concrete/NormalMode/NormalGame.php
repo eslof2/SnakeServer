@@ -2,10 +2,7 @@
 
 namespace Concrete\NormalMode;
 use Concrete\Entity\FoodEntity;
-use Concrete\Factory\PlayerFactory;
-use Concrete\View\DeltaView;
 use Exception;
-use Model\Board\IBoard;
 use Model\Entity\IEntity;
 use Model\Game\GameBase;
 use Model\Player\IPlayer;

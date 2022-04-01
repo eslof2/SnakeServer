@@ -5,8 +5,8 @@ use Model\Direction;
 use Model\Player\PlayerBase;
 
 class NormalPlayer extends PlayerBase {
-    public function tryInstantiate(?int $x = null, ?int $y = null, ?Direction $direction = null): bool {
+    public function __construct(public int $fd, public string $name) {
         $this->shape = new NormalPlayerShape($this->fd);
-        return $this->shape->tryInstantiate($this->board);
+        parent::__construct($fd, $name);
     }
 }

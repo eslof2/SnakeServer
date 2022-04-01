@@ -10,6 +10,7 @@ interface IGame {
     public function getPlayer(int $fd): IPlayer;
     /** @return IPlayer[] */
     public function getPlayers(): array;
+    public function getState(): GameState;
     public function getTickRateNs(): int;
     public function getTimeScale(): float;
     public function onDisconnect(int $fd): void;

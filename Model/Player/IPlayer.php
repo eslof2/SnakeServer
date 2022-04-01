@@ -17,5 +17,4 @@ interface IPlayer extends IState {
     public function setDeathCallback(?Closure $onDeath): void; // TODO: abstract the callback pattern
     public function setBoard(IBoard $board): void;
     public function setInput(Input $input): void;
-    public function tryInstantiate(?int $x = null, ?int $y = null, ?Direction $direction = null): bool;
 }

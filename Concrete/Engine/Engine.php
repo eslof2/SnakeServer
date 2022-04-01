@@ -1,8 +1,9 @@
 <?php declare(strict_types=1);
 
 namespace Concrete\Engine;
+use Model\Game\GameState;
 use Model\Game\IGame;
-use Model\GameState;
+use Model\AtomicState;
 use Model\Log;
 use Swoole\Atomic;
 
@@ -18,7 +19,7 @@ class Engine {
         $game->start($time);
 
         $this->timeExpected = ($game->getTickRateNs() / $game->getTimeScale()); // what the game logic asks for
-        while ($atomicState->get() != GameState::SHUTDOWN->value) {
+        while ($game->getState() != GameState::FINISHED) {
             $game->process(); //do gameStuff()
 
             //sleep for as long as we're expected to in order to meet what's asked

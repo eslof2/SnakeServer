@@ -16,7 +16,7 @@ abstract class PlayerBase implements IPlayer {
     /** @var null|Closure(IPlayer):void */
     protected ?Closure $deathCallback;
 
-    public function __construct(public int $fd,public string $name) { }
+    public function __construct(public int $fd, public string $name) { }
 
     public function getFd(): int { return $this->fd; }
     public function getName(): string { return $this->name; }
@@ -48,7 +48,4 @@ abstract class PlayerBase implements IPlayer {
     public function setInput(Input $input): void {
         $this->input = $input;
     }
-
-    // we let inherited class decide what type of player and how it's instantiated
-    public abstract function tryInstantiate(?int $x = null, ?int $y = null, Direction $direction = null): bool;
 }

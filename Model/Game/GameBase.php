@@ -4,7 +4,7 @@ namespace Model\Game;
 use Concrete\Engine\Time;
 use Concrete\Factory\PlayerFactory;
 use Model\Board\IBoard;
-use Model\GameState;
+use Model\AtomicState;
 use Model\Log;
 use Model\Player\Input;
 use Model\Player\IPlayer;
@@ -16,6 +16,7 @@ use Swoole\Table;
 use Swoole\WebSocket\Server;
 
 abstract class GameBase implements IGame {
+    protected GameState $state;
     protected Server $server;
     protected PDO $database;
     protected Table $playerTable;
@@ -48,17 +49,18 @@ abstract class GameBase implements IGame {
     public function getPlayer(int $fd): IPlayer { return $this->players[$fd]; }
     /** @return IPlayer[] */
     public function getPlayers(): array { return $this->players; }
+    public function getState(): GameState { return $this->state; }
     public function setTimeScale(float $timeScale): void { $this->timeScale = $timeScale; }
     public function getTickRateNs(): int { return $this->tickRateNs; }
     public function getTimeScale(): float { return $this->timeScale; }
     public function process(): void {
         // even if there's no connections there can still be active snakes that will die and submit score
-        if ($this->playerTable->count() == 0 && count($this->players) == 0) {
+        if (count($this->players) == 0 && $this->playerTable->count() == 0) {
             // otherwise we wait for wakeup signals from websocket requests
-            $this->atomicState->set(GameState::WAITING->value);
             Log::Message("No active players, server put in sleep/wait mode.");
+            $this->atomicState->set(AtomicState::WAITING->value);
             $this->atomicState->wait(0); //waiting indefinitely for new connections
-            Log::Message("Server woken up from sleep/wait mode.");
+            Log::Message("Server woken up from sleep/wait mode, sending state to whomever woke me up.");
             $this->broadcastState();
             return;
         }
@@ -73,6 +75,7 @@ abstract class GameBase implements IGame {
         foreach ($this->playerTable as $fdStr => $row) {
             $fd = intval($fdStr);
             if (!($player = $this->tryGetPlayer($fd))) {
+                Log::Message("New player detected from join request for id: ".$fdStr);
                 $player = $newPlayers[$fdStr] = $this->playerFactory->getNewInstance($fd, $row[Config::NAME_COL]);
             }
 
@@ -85,6 +88,7 @@ abstract class GameBase implements IGame {
 
         foreach ($newPlayers as $fdStr => $noob) {
             if ($this->tryAddPlayer($noob)) continue;
+            Log::Message("Failed to add new player, removing from ICP tables for id: ".$fdStr);
             $this->playerTable->del($fdStr);
             $this->inputTable->del($fdStr);
         }
@@ -93,6 +97,7 @@ abstract class GameBase implements IGame {
 
         foreach ($this->players as $fd => $player) {
             if (!$player->isDead()) continue;
+            Log::Message("Removing dead player from array and IPC tables for id: ".$fd);
             unset($this->players[$fd]);
             $this->inputTable->del(strval($fd));
             $this->playerTable->del(strval($fd));
@@ -105,8 +110,8 @@ abstract class GameBase implements IGame {
 
     protected function broadcastStateFor(int $fd): void {
         if (!array_key_exists($fd, $this->lastTickByFd)) {
+            Log::Message("New connection, sending id to client and streaming data for id: ".$fd);
             $this->lastTickByFd[$fd] = $this->time->tickCount - 2;
-            Log::Message("New connection, sending id to client and beginning data stream for id: ".$fd);
             $this->server->push($fd, json_encode(['fd' => $fd]));
         }
         $data = $this->view->serialize($this, $this->time->tickCount, $this->lastTickByFd[$fd]);
@@ -116,6 +121,7 @@ abstract class GameBase implements IGame {
     }
 
     public function onDisconnect(int $fd): void {
+        Log::Message("Disconnect for id: ".$fd);
         unset($this->lastTickByFd[$fd]);
     }
     public function tryGetPlayer(int $fd): ?IPlayer {
@@ -124,31 +130,35 @@ abstract class GameBase implements IGame {
     }
 
     public function tryAddPlayer(IPlayer $player): bool {
-        Log::Message("Attempting to add player to game with id: ".$player->getFd());
+        $fd = $player->getFd();
+        Log::Message("Attempting to add player to game with id: ".$fd);
         $fd = $player->getFd();
         $player->setBoard($this->board);
-        if (!$player->tryInstantiate()) return false;
+        if (!$player->getShape()->tryInstantiate($this->board)) return false;
         $player->setDeathCallback($this->onPlayerDeath(...));
         $this->players[$fd] = $player;
-        Log::Message("Player added to game with id: ".$player->getFd());
+        Log::Message("Player added to game with id: ".$fd);
         return true;
     }
 
     public final function start(Time $time): void {
-        $this->time = $time;
         Log::Message("Game has started.");
+        $this->state = GameState::PLAYING;
+        $this->time = $time;
         $this->onStart();
     }
 
     public abstract function onStart(): void;
     protected function onPlayerDeath(IPlayer $player): void {
+        $fd = $player->getFd();
+        Log::Message("Player death, inserting name and score into db for id: ".$fd);
         $sql = "INSERT INTO score (name, score) VALUES (:name, :score)";
         $prep = $this->database->prepare($sql);
         $name = $player->getName();
         $score = $player->getScore();
-        Log::Message("Player death, sending name and score for id: ".$player->getFd());
         $prep->bindParam("name", $name, PDO::PARAM_STR, Config::NAME_VARCHAR_MAX);
         $prep->bindParam("score", $score, PDO::PARAM_INT); // TODO: hard coded
-        $prep->execute();
+        $success = $prep->execute();
+        Log::Message("Status for db insert for id: ".$fd.", was ".($success ? "" : "un")."successful.");
     }
 }

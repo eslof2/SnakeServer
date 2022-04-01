@@ -14,16 +14,16 @@ abstract class ShapeBase implements IShape {
     protected int $size;
 
     public final function tryInstantiate(IBoard $board, ?int $x = null, ?int $y = null, Direction $direction = null, int $size = 3): bool {
+        Log::Message("Attempting to instantiate player shape.");
         $this->size = $size;
         $this->board = $board;
-        Log::Message("Attempting to instantiate player.");
         if ($x === null || $y === null) {
             if (!($newSlot = $this->board->tryGetEmptySlot())) return false;
         } elseif (!($newSlot = $this->board->tryGetSlot($x, $y)) || !$newSlot->isEmpty()) return false;
         $x = $y = 0;
         $newSlot->getPosition(outX: $x, outY: $y);
         $this->instantiate($newSlot, $direction);
-        Log::Message("Player instantiation successful.");
+        Log::Message("Player shape instantiation successful.");
         return true;
     }
 

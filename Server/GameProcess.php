@@ -3,7 +3,7 @@
 namespace Server;
 use Concrete\Engine\Engine;
 use Model\Game\IGame;
-use Model\GameState;
+use Model\AtomicState;
 use Model\Log;
 use Model\Player\Input;
 use PDO;
@@ -28,7 +28,7 @@ class GameProcess {
         $inputTable = $this->inputTable = new Table(Config::CONCURRENT_MAX);
         $inputTable->column(Config::INPUT_COL, Table::TYPE_INT, 4);       //1,2,4,8
         $inputTable->create();
-        $this->atomicState = new Atomic(GameState::SHUTDOWN->value);
+        $this->atomicState = new Atomic(AtomicState::SHUTDOWN->value);
     }
 
     public function tryJoin(int $fd, mixed $data): bool {
@@ -45,7 +45,7 @@ class GameProcess {
     }
 
     public function wakeUp(): void {
-        if ($this->atomicState->get() == GameState::WAITING->value) $this->atomicState->wakeup();
+        if ($this->atomicState->get() == AtomicState::WAITING->value) $this->atomicState->wakeup();
     }
 
     public function tryInput(int $fd, mixed $data): bool {
@@ -58,13 +58,13 @@ class GameProcess {
 
     public function getNewProcess(IGame $game, Server $server): Process {
         return new Process(function ($process) use ($game, $server) {
-            $state = GameState::from($this->atomicState->get());
-            if ($state != GameState::SHUTDOWN) {
+            $state = AtomicState::from($this->atomicState->get());
+            if ($state != AtomicState::SHUTDOWN) {
                 error_log("Invalid Atomic GameState for getNewProcess: ".$state::class."::".$state->name);
                 $server->shutdown();
             }
 
-            $this->atomicState->set(GameState::STARTING->value);
+            $this->atomicState->set(AtomicState::STARTING->value);
 
             try {
                 $pdo = new PDO(Config::PDO_DNS, options: Config::PDO_OPTIONS);
@@ -72,14 +72,14 @@ class GameProcess {
                 $code = (int)$e->getCode();
                 $msg = $e->getMessage();
                 error_log("PDO Error ($code): $msg");
-                $this->atomicState->set(GameState::ERROR->value);
+                $this->atomicState->set(AtomicState::ERROR->value);
                 $server->shutdown();
                 return;
             }
             Log::Message("Starting game loop.");
             $game->setUp($server, $pdo, $this->playerTable, $this->inputTable, $this->atomicState);
             new Engine($game, $this->atomicState);
-            $this->atomicState->set(GameState::SHUTDOWN->value);
+            $this->atomicState->set(AtomicState::SHUTDOWN->value);
         });
     }
 }
