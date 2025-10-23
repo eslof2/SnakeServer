@@ -97,7 +97,16 @@ class NormalPlayerShape extends ShapeBase {
     protected function instantiate(ISlot $slot, ?Direction $direction = null): void {
         $x = $y = 0;
         $slot->getPosition(outX: $x, outY: $y);
-        $direction = $direction ?? $x > $this->board->getWidth() ? Direction::LEFT : Direction::RIGHT;
+        if ($direction === null) {
+            $centerX = $this->board->getWidth() / 2;
+            $centerY = $this->board->getHeight() / 2;
+            $direction = match(true) {
+                $x > $centerX => Direction::LEFT,
+                $x < $centerX => Direction::RIGHT,
+                $y > $centerY => Direction::DOWN,
+                default => Direction::UP
+            };
+        }
         $entity = new PlayerEntity($this->fd, PlayerType::HEAD);
         $entity->setDirection($direction);
         $slot->add($entity);
